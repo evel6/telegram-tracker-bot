@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>جارٍ التحقق...</title>
+  <script src="https://openfpcdn.io/fingerprintjs/v3"></script>
+</head>
+<body>
+  <h2>🔍 جاري التحقق من الجهاز...</h2>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("id") || "0";
+
+    async function sendData() {
+      const fp = await FingerprintJS.load();
+      const result = await fp.get();
+      const fingerprint = result.visitorId;
+
+      const res = await fetch("curl https://api.ipinfo.io/lite/8.8.8.8?token=cb4dd6c6220e6e ");
+      const ipInfo = await res.json();
+
+      const payload = {
+        id: id,
+        ip: ipInfo.ip,
+        country: ipInfo.country,
+        device: navigator.userAgent,
+        browser: navigator.appCodeName,
+        os: navigator.platform,
+        vpn: ipInfo?.privacy?.vpn || false,
+        fingerprint: fingerprint
+      };
+
+      await fetch("https://yourapp.onrender.com/collect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+    }
+
+    sendData();
+  </script>
+</body>
+</html>
